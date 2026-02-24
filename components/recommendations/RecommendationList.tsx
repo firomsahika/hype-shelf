@@ -1,9 +1,9 @@
-import { Recommendation } from "@/lib/types";
+import { RecommendationDisplay } from "@/lib/types";
 import { RecommendationCard } from "./RecommendationCard";
 import { BookOpen } from "lucide-react";
 
 interface RecommendationListProps {
-    recommendations: Recommendation[];
+    recommendations: RecommendationDisplay[];
     currentUserId?: string;
     role?: string;
     onToggleStaffPick?: (id: string) => void;
