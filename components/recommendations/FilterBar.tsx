@@ -13,7 +13,7 @@ export function FilterBar({ activeGenre, onFilterChange }: FilterBarProps) {
 
     return (
         <div
-            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"
+            className="flex flex-wrap items-center gap-2"
             role="group"
             aria-label="Filter by genre"
         >
@@ -24,9 +24,9 @@ export function FilterBar({ activeGenre, onFilterChange }: FilterBarProps) {
                         key={genre}
                         onClick={() => onFilterChange(genre)}
                         aria-pressed={isActive}
-                        className={`shrink-0 whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${isActive
-                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                                : "bg-white/5 text-slate-500 hover:bg-white/10 hover:text-slate-300"
+                        className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${isActive
+                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                            : "bg-white/5 text-slate-500 hover:bg-white/10 hover:text-slate-300"
                             }`}
                     >
                         {genre === "all" ? "All" : capitalize(genre)}

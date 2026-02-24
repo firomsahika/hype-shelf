@@ -9,7 +9,7 @@ export function Navbar() {
     const { isSignedIn } = useUser();
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50">
+        <header className="fixed top-0 left-0 right-0 z-50" suppressHydrationWarning>
             {/* Frosted glass bar */}
             <div className="border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
                 <Container>

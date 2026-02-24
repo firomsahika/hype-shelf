@@ -1,19 +1,15 @@
 import { query } from "./_generated/server";
-import { ConvexError } from "convex/values";
 
-/**
- * Returns the current user's role from the Clerk JWT publicMetadata.
- * This is the secure way to expose role data to the client:
- * the JWT is verified by Convex — the client cannot spoof it.
- *
- * Usage in components:
- *   const role = useQuery(api.users.getMyRole);
- */
 export const getMyRole = query({
     args: {},
     handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new ConvexError("Unauthenticated");
+
+        // Change: Return null instead of throwing an error.
+        // This allows the frontend to stay calm while loading.
+        if (!identity) {
+            return null;
+        }
 
         const meta = identity as {
             publicMetadata?: { role?: string };

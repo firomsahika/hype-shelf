@@ -45,11 +45,11 @@ export function RecommendationCard({
     const canDelete = isAdmin || recommendation.userId === currentUserId;
 
     return (
-        <article className="group rounded-2xl border border-white/5 bg-white/[0.03] p-5 transition-all hover:border-white/10 hover:bg-white/[0.05]">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+        <article className="group min-w-0 rounded-2xl border border-white/5 bg-white/[0.03] p-5 transition-all hover:border-white/10 hover:bg-white/[0.05]">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                 {/* Title + Staff Pick */}
-                <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-semibold text-white">{recommendation.title}</h3>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <h3 className="min-w-0 break-words text-base font-semibold text-white">{recommendation.title}</h3>
                     {recommendation.isStaffPick && <StaffPickBadge />}
                 </div>
 
@@ -67,7 +67,7 @@ export function RecommendationCard({
             </p>
 
             {/* Footer row */}
-            <div className="mt-4 flex items-center gap-3 border-t border-white/5 pt-4">
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-white/5 pt-4">
                 <span className="flex-1 text-xs text-slate-600">
                     Added by{" "}
                     <span className="font-medium text-slate-400">{recommendation.userName}</span>

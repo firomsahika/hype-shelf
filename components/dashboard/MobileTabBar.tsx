@@ -9,7 +9,7 @@ interface MobileTabBarProps {
 
 export function MobileTabBar({ activeTab, onTabChange }: MobileTabBarProps) {
     return (
-        <div className="mb-6 flex rounded-xl border border-white/5 bg-white/[0.03] p-1 lg:hidden">
+        <div className="mb-6 flex rounded-xl border border-white/5 bg-white/[0.03] p-1 lg:hidden" suppressHydrationWarning>
             {(["shelf", "add"] as const).map((tab) => (
                 <button
                     key={tab}

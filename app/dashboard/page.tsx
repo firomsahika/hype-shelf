@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useQuery, useMutation } from "convex/react";
+import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Navbar } from "@/components/layout/Navbar";
@@ -14,16 +14,27 @@ import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { AddRecommendationInput, Genre } from "@/lib/types";
 
 export default function DashboardPage() {
-    const { user } = useUser();
+    const { user, isLoaded, isSignedIn } = useUser();
+    const { isAuthenticated, isLoading: convexLoading } = useConvexAuth();
     const [activeGenre, setActiveGenre] = useState<Genre | "all">("all");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<"shelf" | "add">("shelf");
 
-    const role = useQuery(api.users.getMyRole);
-    const recommendations = useQuery(api.recommendations.getAll) ?? [];
+    // Skip Convex queries until its auth token is ready.
+    // proxy.ts already handles redirecting unauthenticated users server-side,
+    // so we never need a client-side redirect here — that caused the infinite loop.
+    const skipQuery = convexLoading || !isAuthenticated;
+    const role = useQuery(api.users.getMyRole, skipQuery ? "skip" : {});
+    const recommendations = useQuery(api.recommendations.getAll, skipQuery ? "skip" : {}) ?? [];
     const addMutation = useMutation(api.recommendations.add);
     const deleteMutation = useMutation(api.recommendations.remove);
     const togglePickMutation = useMutation(api.recommendations.toggleStaffPick);
+
+    // Show nothing while Clerk or Convex auth is still initialising
+    if (!isLoaded || convexLoading) return null;
+
+    console.log("Loaded:", isLoaded);
+    console.log("Signed in:", isSignedIn);
 
     const staffPicks = recommendations.filter((r) => r.isStaffPick);
     const isLoading = recommendations === undefined;
@@ -44,14 +55,14 @@ export default function DashboardPage() {
                 <DashboardHeader totalCount={recommendations.length} staffPickCount={staffPicks.length} />
                 <Container className="py-8">
                     <MobileTabBar activeTab={activeTab} onTabChange={setActiveTab} />
-                    <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
-                        <DashboardSidebar onAdd={handleAdd} isSubmitting={isSubmitting} staffPicks={staffPicks} activeTab={activeTab} role={role} />
+                    <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+                        <DashboardSidebar onAdd={handleAdd} isSubmitting={isSubmitting} staffPicks={staffPicks} activeTab={activeTab} role={role ?? undefined} />
                         <ShelfSection
                             recommendations={recommendations}
                             activeGenre={activeGenre}
                             onFilterChange={setActiveGenre}
                             currentUserId={user?.id}
-                            role={role}
+                            role={role ?? undefined}
                             onToggleStaffPick={(id: Id<"recommendations">) => togglePickMutation({ id })}
                             onDelete={(id: Id<"recommendations">) => deleteMutation({ id })}
                             activeTab={activeTab}

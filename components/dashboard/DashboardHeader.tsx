@@ -26,7 +26,7 @@ export function DashboardHeader({ totalCount, staffPickCount }: DashboardHeaderP
     if (!mounted || !isLoaded) return null; // Or a skeleton loader
 
     return (
-        <div className="border-b border-white/5 bg-gradient-to-r from-indigo-950/50 via-slate-900/80 to-violet-950/50 py-8">
+        <div className="border-b border-white/5 bg-gradient-to-r from-indigo-950/50 via-slate-900/80 to-violet-950/50 py-8"  suppressHydrationWarning>
             <Container>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>

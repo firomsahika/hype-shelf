@@ -1,6 +1,6 @@
 "use client";
 
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useAuth } from "@clerk/nextjs";
 
@@ -9,9 +9,11 @@ const convex = new ConvexReactClient(
 );
 
 /**
- * Wraps the app with both the Convex client and Clerk auth integration.
- * ConvexProviderWithClerk automatically passes the Clerk JWT to every
- * Convex request, enabling ctx.auth.getUserIdentity() in server functions.
+ * Wraps the app with Convex + Clerk auth integration.
+ * ConvexProviderWithClerk already includes ConvexProvider internally —
+ * do NOT also wrap with ConvexProvider or you get two separate contexts.
+ * This automatically passes the Clerk JWT to every Convex request,
+ * enabling ctx.auth.getUserIdentity() in server functions.
  */
 export function ConvexClientProvider({
     children,
@@ -19,10 +21,8 @@ export function ConvexClientProvider({
     children: React.ReactNode;
 }) {
     return (
-        <ConvexProvider client={convex}>
-            <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-                {children}
-            </ConvexProviderWithClerk>
-        </ConvexProvider>
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+            {children}
+        </ConvexProviderWithClerk>
     );
 }
