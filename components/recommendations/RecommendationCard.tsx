@@ -1,6 +1,6 @@
 "use client";
 
-import { Recommendation, Genre } from "@/lib/types";
+import { RecommendationDisplay, Genre } from "../../lib/types"
 import { StaffPickBadge } from "./StaffPickBadge";
 import { ExternalLink, Trash2, Star } from "lucide-react";
 import { capitalize } from "@/lib/utils";
@@ -19,7 +19,7 @@ const genreColors: Record<Genre, string> = {
 };
 
 interface RecommendationCardProps {
-    recommendation: Recommendation;
+    recommendation: RecommendationDisplay;
     currentUserId?: string;
     role?: string;
     /**
