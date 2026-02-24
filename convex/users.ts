@@ -11,17 +11,22 @@ import { v } from "convex/values";
  * @returns The user's role string ("admin" | "user") or null if unauthenticated.
  */
 export const getMyRole = query({
-    const roleFromToken = (identity.publicMetadata as { role?: string })?.role;
-    if(roleFromToken) return roleFromToken;
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return null;
 
-    // 2. Fallback to database record
-    const user = await ctx.db
-        .query("users")
-        .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-        .unique();
+        const roleFromToken = (identity.publicMetadata as { role?: string })?.role;
+        if (roleFromToken) return roleFromToken;
 
-    return user?.role ?? "user";
-},
+        // 2. Fallback to database record
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+            .unique();
+
+        return user?.role ?? "user";
+    },
 });
 
 /**
