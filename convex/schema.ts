@@ -24,5 +24,12 @@ export default defineSchema({
         link: v.optional(v.string()),
         blurb: v.string(),
         isStaffPick: v.boolean(),
-    }).index("by_user", ["userId"])
+    }).index("by_user", ["userId"]),
+
+    users: defineTable({
+        tokenIdentifier: v.string(), // Clerk's unique ID
+        name: v.string(),
+        email: v.string(),
+        role: v.string(), // "admin" or "user"
+    }).index("by_tokenIdentifier", ["tokenIdentifier"]),
 });

@@ -9,23 +9,25 @@ import { ConvexError } from "convex/values";
  * Asserts the request is authenticated and returns the Clerk identity.
  * Throws a ConvexError (mapped to HTTP 401) if not signed in.
  */
-async function requireAuth(ctx: { auth: { getUserIdentity: () => Promise<unknown> } }) {
+/**
+ * Asserts the request is authenticated and returns the Clerk identity.
+ */
+async function requireAuth(ctx: any) {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Unauthenticated");
-    return identity as {
-        subject: string;         // Clerk userId
-        name?: string;
-        nickname?: string;
-        given_name?: string;
-        publicMetadata?: { role?: string };
-    };
+    return identity;
 }
 
 /**
- * Returns the role from the Clerk JWT public metadata.
- * Defaults to "user" if unset — admins must be explicitly granted.
+ * Returns the role by checking the 'users' table first, then falling back to JWT metadata.
  */
-function getRole(identity: { publicMetadata?: { role?: string } }): string {
+async function getRole(ctx: any, identity: any): Promise<string> {
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_tokenIdentifier", (q: any) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+
+    if (user) return user.role;
     return (identity.publicMetadata?.role as string | undefined) ?? "user";
 }
 
@@ -41,23 +43,28 @@ export const getLatest = query({
     handler: async (ctx) => {
         return ctx.db
             .query("recommendations")
-            // .withIndex("by_created")
-            .order("desc")  
+            .order("desc")
             .take(5);
     },
 });
 
 /**
- * AUTHENTICATED — requires a valid Clerk session.
- * Returns all recommendations, ordered newest first.
+ * AUTHENTICATED — returns all recommendations, ordered newest first.
+ * 
+ * Security:
+ * - Requires a valid Clerk session.
+ * - Performs server-side authentication check.
  */
 export const getAll = query({
     args: {},
     handler: async (ctx) => {
-        await requireAuth(ctx);
-        return ctx.db.query("recommendations").order("desc").collect();
+        const identity = await requireAuth(ctx);
+        return ctx.db.query("recommendations")
+            .order("desc")
+            .collect();
     },
 });
+
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
@@ -110,7 +117,7 @@ export const remove = mutation({
     args: { id: v.id("recommendations") },
     handler: async (ctx, { id }) => {
         const identity = await requireAuth(ctx);
-        const role = getRole(identity);
+        const role = await getRole(ctx, identity);
 
         const rec = await ctx.db.get(id);
         if (!rec) throw new ConvexError("Recommendation not found");
@@ -134,7 +141,7 @@ export const toggleStaffPick = mutation({
     args: { id: v.id("recommendations") },
     handler: async (ctx, { id }) => {
         const identity = await requireAuth(ctx);
-        const role = getRole(identity);
+        const role = await getRole(ctx, identity);
 
         if (role !== "admin") {
             throw new ConvexError("Forbidden: only admins can set Staff Picks");

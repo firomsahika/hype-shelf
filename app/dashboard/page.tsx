@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -13,6 +13,15 @@ import { ShelfSection } from "@/components/dashboard/ShelfSection";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { AddRecommendationInput, Genre } from "@/lib/types";
 
+/**
+ * DashboardPage: The main authenticated view for HypeShelf.
+ * 
+ * This component manages:
+ * - Real-time synchronization of recommendations via Convex.
+ * - User session and role-based access control (RBAC).
+ * - Client-side state for filtering and tab management.
+ * - Integration with Clerk for identity verification.
+ */
 export default function DashboardPage() {
     const { user, isLoaded, isSignedIn } = useUser();
     const { isAuthenticated, isLoading: convexLoading } = useConvexAuth();
@@ -29,6 +38,21 @@ export default function DashboardPage() {
     const addMutation = useMutation(api.recommendations.add);
     const deleteMutation = useMutation(api.recommendations.remove);
     const togglePickMutation = useMutation(api.recommendations.toggleStaffPick);
+    // const syncUserMutation = useMutation(api.users.syncUser);
+    const storeUser = useMutation(api.users.storeUser);
+
+    // Sync user record on load
+    // useState(() => {
+    //     if (!skipQuery) syncUserMutation();
+    // });
+
+    useEffect(() => {
+        if (isLoaded && user) {
+            storeUser();
+        }
+    }, [isLoaded, user, storeUser]);
+
+    console.log("This is role", role);
 
     // Show nothing while Clerk or Convex auth is still initialising
     if (!isLoaded || convexLoading) return null;

@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HypeShelf | Professional Recommendation Platform
 
-## Getting Started
+HypeShelf is a high-performance, security-focused web application for sharing and managing media recommendations. Built with a modern serverless stack, it prioritizes visual excellence, reactive data, and robust role-based access control.
 
-First, run the development server:
+## 🏗️ Technical Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+HypeShelf is built on a "Reactive Serverless" architecture, leveraging best-in-class tools for authentication, data persistence, and UI rendering.
+
+- **Frontend**: Next.js 16 (App Router) with React Server Components.
+- **Backend / Database**: [Convex](https://convex.dev) - A reactive database that syncs state to the client in real-time via WebSockets.
+- **Authentication**: [Clerk](https://clerk.com) - Integrated with Convex for verified JWT-based identity.
+- **Styling**: Tailwind CSS with a premium dark aesthetic.
+
+## 🔐 Security-Minded Thinking
+
+Security is baked into the core of HypeShelf, following the principle of **Never Trust the Client**.
+
+### Identity & Authentication
+- **Verified JWTs**: Every backend request is verified against Clerk's public keys. We never trust a `userId` sent from the client; it is always extracted from the verified identity in the backend `ctx.auth`.
+- **Syncing User State**: User records are synced automatically upon login to ensure consistent metadata and role management.
+
+### Role-Based Access Control (RBAC)
+- **Admin vs. User**: The system differentiates between standard users and administrators.
+- **Server-Side Verification**: Permissions (e.g., deleting any post, marking "Staff Picks") are enforced at the database level. We re-verify roles in the backend even if the client-side UI has already checked them.
+- **Automatic Admin Elevation**: For ease of testing in new environments, the first user to register in the database is automatically granted the `admin` role.
+
+### Data Integrity
+- **Schema Validation**: Every table in Convex is protected by a strict schema (`convex/schema.ts`), preventing malformed data from ever entering the system.
+- **Input Sanitization**: All user-generated content (titles, blurbs) is trimmed and length-validated on the server before insertion.
+
+## 📁 Project Structure
+
+```text
+├── app/                  # Next.js App Router (Pages, Layouts)
+├── components/           # Reusable UI components
+│   ├── dashboard/        # Feature-specific dashboard components
+│   ├── layout/           # Shared layout components (Navbar, Container)
+│   ├── recommendations/  # Recommendation-specific UI
+│   └── ui/               # Lower-level primitive components (Radix/shadcn)
+├── convex/               # Backend logic and Database configuration
+│   ├── _generated/       # Type-safe generated Convex code
+│   ├── recommendations.ts# Core recommendation logic (Queries/Mutations)
+│   ├── users.ts          # User management and RBAC logic
+│   └── schema.ts         # Strictly typed database schema
+├── lib/                  # Shared utilities and type definitions
+└── public/               # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd hype_shelf
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. **Configure Environment Variables**:
+   Copy `.env.local.example` to `.env.local` and populate your Clerk and Convex keys.
 
-To learn more about Next.js, take a look at the following resources:
+4. **Launch Development Environment**:
+   ```bash
+   # Terminal 1: Next.js dev server
+   npm run dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   # Terminal 2: Convex backend sync
+   npx convex dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*HypeShelf — Built for Experts, Powered by Hype.*

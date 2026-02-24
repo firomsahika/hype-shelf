@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Doc } from "@/convex/_generated/dataModel";
 import { RecommendationForm } from "@/components/recommendations/RecommendationForm";
 import { AddRecommendationInput } from "@/lib/types";
@@ -14,14 +15,23 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ onAdd, isSubmitting, staffPicks, activeTab, role }: DashboardSidebarProps) {
-    const isAdmin = role === "admin";
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const isAdmin = mounted && role === "admin";
+
+
+
     return (
         <aside className="order-2 lg:order-1" suppressHydrationWarning>
             <div className="sticky top-24 space-y-4">
                 {/* Role Status Badge */}
                 <div className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-wider ${isAdmin
-                        ? "border-amber-500/20 bg-amber-500/5 text-amber-400"
-                        : "border-white/5 bg-white/5 text-slate-500"
+                    ? "border-amber-500/20 bg-amber-500/5 text-amber-400"
+                    : "border-white/5 bg-white/5 text-slate-500"
                     }`}>
                     <div className={`h-1.5 w-1.5 rounded-full ${isAdmin ? "bg-amber-400 animate-pulse" : "bg-slate-600"}`} />
                     {isAdmin ? "Admin Access" : "Standard User"}
